@@ -20,7 +20,7 @@ const isValidLogin = (value: string) => {
 const composeValidators = (...validators: any[]) => (value: string) =>
     validators.reduce((error, validator) => error || validator(value), undefined)
 
-export default function Form({onSubmit}: FormProps)
+export default function RegistrationForm({onSubmit}: FormProps)
 {
     //
     const submitHandler = (data: FormData) => {
@@ -28,6 +28,7 @@ export default function Form({onSubmit}: FormProps)
     };
 
     return <>
+        <h3>Registration</h3>
         <FinalForm
             onSubmit={submitHandler}
             render={({handleSubmit}) =>
