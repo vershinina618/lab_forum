@@ -1,18 +1,18 @@
 import React, {useState} from 'react';
-import RegistrationForm, {RegFormData} from "../components/RegistrationForm/RegistrationForm";
-import { BASE_URL} from "../servises/post";
+import LoginForm, { LoginFormData } from "../components/LoginForm/LoginForm";
 import {useNavigate} from "react-router-dom";
+import {BASE_URL} from "../servises/post";
 
-const RegistrationView = () => {
+const LoginView = () =>{
     const navigate = useNavigate();
     const [result, setResult] = useState("");
     const [error, setError] = useState("");
-    const onSubmit = (data: RegFormData) => {
-        const regRequest = async () => {
+    const onSubmit = (data: LoginFormData) => {
+        const loginRequest = async () => {
             setError("");
             setResult("");
             try{
-                const response = await fetch(`${BASE_URL}/user`, {
+                const response = await fetch(`${BASE_URL}/auth`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -23,27 +23,26 @@ const RegistrationView = () => {
                     const responseData = await response.json();
                     throw Error(responseData.message);
                 }
-                setResult("Пользователь создан");
+                setResult("Пользователь вошел");
                 setTimeout(() => {
-                    navigate("/login");
+                    navigate("/home");
                 }, 1000);
             }catch (e) {
                 if (e instanceof Error) {
-                    //setError(e.message);
-                    setError("пользователь с таким логином уже существует");
+                    setError(e.message);
                 }
             }
         };
-        regRequest();
-    };
+        loginRequest();
 
+    };
     return (
         <div>
-            <RegistrationForm onSubmit={onSubmit} />
-             {result && <>{result}</>}
-             {error && <>{error}</>}
+            <LoginForm onSubmit={onSubmit} />
+            {result && <>{result}</>}
+            {error && <>{error}</>}
         </div>
     );
-};
+}
 
-export default RegistrationView;
+export default LoginView;

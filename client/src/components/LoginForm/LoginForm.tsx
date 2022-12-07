@@ -1,66 +1,73 @@
-import React from "react";
-import {Form as FinalForm, Field } from 'react-final-form';
+import { FormEvent, useState } from "react";
+import styles from "../Form.module.css";
 
-export type FormData = {
+export type LoginFormData = {
     login: string;
     password: string;
 }
+
 type FormProps = {
-    onSubmit: (data: FormData) => void;
+    onSubmit: (data: LoginFormData) => void;
 }
-const required = (value: string) => (value ? undefined : "обязательное поле")
 
-const isValidLogin = (value: string) => {
-    if (!/^([a-z0-9]{6,20})$/.test(value)) {
-        return "Логин должен содержать от 6 до 20 символов латинского алфавита и цифры.";
-    }
-    return undefined;
-};
+export default function LoginForm({onSubmit}: FormProps) {
+    const [login, setLogin] = useState("");
+    const [loginError, setLoginError] = useState("");
+    const [password, setPassword] = useState("");
+    const [passwordError, setPasswordError] = useState("");
 
-const composeValidators = (...validators: any[]) => (value: string) =>
-    validators.reduce((error, validator) => error || validator(value), undefined)
+    const isValid = (): boolean => {
+        let result = true;
 
-export default function LoginForm({onSubmit}: FormProps)
-{
-    //
-    const submitHandler = (data: FormData) => {
-        onSubmit(data)
+        // очищаем ошибки
+        setLoginError("");
+
+        if (!/^([a-z0-9]{6,20})$/.test(login)) {
+            setLoginError("Логин должен содержать от 6 до 20 символов латинского алфавита и цифры.");
+            result = false;
+        }
+
+        setPasswordError("");
+
+        if (password.length === 0) {
+            setPasswordError("Пароль не может быть пустым.");
+            result = false;
+        }
+
+        return result;
+    };
+
+    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        if (isValid()) {
+            onSubmit({
+                login,
+                password
+            });
+        }
     };
 
     return <>
-        <h3>Login</h3>
-        <FinalForm
-            onSubmit={submitHandler}
-            render={({handleSubmit}) =>
-                <form onSubmit={handleSubmit}>
-                    <Field
-                        name="login"
-                        validate={composeValidators(required, isValidLogin)}
-                        render={({input, meta}) => (<>
-                            <div>
-                                <label>
-                                    Login:
-                                    <input {...input}
-                                    />
-                                </label>
-                                {meta.touched && meta.error && <div>{meta.error}</div>}
-                            </div>
-                        </>)}/>
-                    <Field
-                        name="password"
-                        validate={required}
-                        render={({input, meta}) => (<>
-                            <div>
-                                <label>
-                                    Password:
-                                    <input {...input} type="password"
-                                    />
-                                </label>
-                                {meta.touched && meta.error && <div>{meta.error}</div>}
-                            </div>
-                        </>)}/>
-                    <button type="submit">Send</button>
-                </form>
-            }/>
+        <h3>Логин</h3>
+        <form onSubmit={handleSubmit}>
+            <div>
+                <label>Логин:
+                    <input value={login} onChange={e => setLogin(e.target.value)}/>
+                </label>
+                {loginError && <div className={styles.error}>
+                    {loginError}
+                </div>}
+            </div>
+            <div>
+                <label>Пароль:
+                    <input type="password" value={password} onChange={e => setPassword(e.target.value)}/>
+                </label>
+                {passwordError && <div className={styles.error}>
+                    {passwordError}
+                </div>}
+            </div>
+            <button type="submit">Войти</button>
+        </form>
     </>;
 }

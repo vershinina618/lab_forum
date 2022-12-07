@@ -9,6 +9,7 @@ app.use(
     })
 );
 
+
 const users = [
     {
         id: nanoid(),
@@ -16,6 +17,14 @@ const users = [
         password: "123"
     }
 ]
+const tokens = [
+    {
+        userId: "12345",
+        token: "1234",
+        createdAt: Date()
+    }
+];
+
 const port = process.env.PORT || 3001;
 
 app.get('/', (req, res) => {
@@ -47,6 +56,33 @@ app.post('/user', (req, res) => {
     users.push(newUser);
     console.log(users);
     res.status(200).json(newUser);
+
+});
+
+app.post('/auth', (req, res) => {
+    const user = users.find(user => user.login === req.body.login);
+    if (!user)
+    {
+        return res.status(404).json({massage: "пользователь не найден"});
+    }
+    if (user.password !== req.body.password){
+        return res.status(400).json({massage: "password wrong"});
+    }
+
+    const token = nanoid();
+    tokens.push({
+        userId: user.id,
+        token,
+        createdAt: Date()
+    });
+    res.cookie("token", token, {
+        maxAge: 24 * 60 * 60 * 1000, // TODO: to const
+        httpOnly: true,
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        secure: process.env.NODE_ENV === 'production'
+    });
+
+    res.status(200).json(token);
 
 });
 
